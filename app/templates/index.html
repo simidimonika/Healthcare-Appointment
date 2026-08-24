@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ app_name }} - AI Healthcare Follow-up Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Demo Switcher Sticky Bar -->
+  <div class="demo-banner">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="color: var(--accent-cyan); font-weight: 700;">⚡ Instant Persona Switcher:</span>
+      <span style="color: var(--text-secondary); font-size: 0.8rem;">Switch active user to preview role flows:</span>
+    </div>
+    <div class="demo-actions">
+      <button class="demo-pill patient" onclick="demoSwitch('patient')">👤 Patient (Sarah Chen)</button>
+      <button class="demo-pill doctor" onclick="demoSwitch('doctor')">🩺 Doctor (Dr. Marcus Vance)</button>
+      <button class="demo-pill admin" onclick="demoSwitch('admin')">👑 Clinic Admin</button>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-content">
+      <div class="brand-logo">
+        <div class="brand-icon">✚</div>
+        <div>
+          <span>Clinic</span><span class="text-gradient">Pulse AI</span>
+        </div>
+      </div>
+
+      <nav class="nav-links" id="navTabs">
+        <!-- Dynamic tabs rendered by app.js based on active role -->
+      </nav>
+
+      <div class="nav-user-actions">
+        <!-- Notifications Bell -->
+        <button class="notif-bell-btn" onclick="toggleNotificationDrawer()" title="Notifications">
+          <span>🔔</span>
+          <span class="notif-badge" id="notifCountBadge" style="display: none;">0</span>
+        </button>
+
+        <!-- User Profile Badge -->
+        <div class="user-badge">
+          <span id="navUserName" style="font-weight: 600; font-size: 0.88rem;">Patient</span>
+          <span id="navUserRole" class="user-role-tag patient">patient</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container" style="flex: 1; padding-bottom: 60px;">
+
+    <!-- ==========================================
+         VIEW 1: PATIENT - FIND DOCTORS & BOOK
+         ========================================== -->
+    <section id="view-doctors" class="view-section">
+      <div class="hero-banner">
+        <div>
+          <h1 class="hero-title">Intelligent Care & <span class="text-gradient">AI-Powered Follow-up</span></h1>
+          <p class="hero-subtitle">
+            Book certified physicians with real-time slot locking, instant pre-visit symptom urgency triage, 1-click Google Calendar integration, and automated post-visit care plans.
+          </p>
+        </div>
+        <div>
+          <button class="btn btn-primary" onclick="switchTab('patient-appts')">
+            <span>📅</span> View My Consultations
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div style="display: flex; gap: 14px; margin-top: 24px; flex-wrap: wrap;">
+        <input 
+          type="text" 
+          id="doctorSearchInput" 
+          class="form-input" 
+          placeholder="🔍 Search doctor by name or specialty..." 
+          style="max-width: 400px;"
+        >
+      </div>
+
+      <!-- Specialisation Chips -->
+      <div class="chip-group" id="specChipGroup">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Doctors Grid -->
+      <div class="grid-cards" id="doctorListGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 2: PATIENT - APPOINTMENTS & CARE
+         ========================================== -->
+    <section id="view-patient-appts" class="view-section" style="display: none; margin-top: 30px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2>My Appointments & Care Journey</h2>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Track your upcoming visits, AI symptom analysis, medication schedules, and calendar sync.</p>
+        </div>
+        <button class="btn btn-primary" onclick="switchTab('doctors')">+ Book New Consultation</button>
+      </div>
+
+      <div class="grid-cards" id="patientApptsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 3: DOCTOR - QUEUE & AI TRIAGE
+         ========================================== -->
+    <section id="view-doctor-appts" class="view-section" style="display: none; margin-top: 30px;">
+      <div style="margin-bottom: 24px;">
+        <h2>Doctor Consultation Dashboard & AI Triage</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Review patient pre-visit symptom analysis, chief complaints, and suggested clinical questions before conducting visits.</p>
+      </div>
+
+      <div id="doctorQueueContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 4: DOCTOR - LEAVE MANAGEMENT
+         ========================================== -->
+    <section id="view-doctor-leaves" class="view-section" style="display: none; margin-top: 30px;">
+      <div id="doctorLeaveContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 5: ADMIN - CLINIC DASHBOARD
+         ========================================== -->
+    <section id="view-admin-dash" class="view-section" style="display: none; margin-top: 30px;">
+      <div style="margin-bottom: 24px;">
+        <h2>Clinic Operations & Intelligence Center</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Real-time overview of clinic appointments, doctor schedules, AI triage breakdown, and background workers.</p>
+      </div>
+
+      <div id="adminDashContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 6: ADMIN - DOCTOR PROFILES
+         ========================================== -->
+    <section id="view-admin-doctors" class="view-section" style="display: none; margin-top: 30px;">
+      <div id="adminDoctorsContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 7: ADMIN - NOTIFICATION RETRY QUEUE
+         ========================================== -->
+    <section id="view-admin-notifs" class="view-section" style="display: none; margin-top: 30px;">
+      <div id="adminNotifsContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       MODALS
+       ========================================== -->
+
+  <!-- Booking & Slot Hold Modal -->
+  <div class="modal-backdrop" id="bookingModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 id="bookingDocName">Dr. Doctor Name</h3>
+          <div id="bookingDocSpec" style="color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600;">Specialist</div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('bookingModal')">✕</button>
+      </div>
+
+      <!-- Slot Hold Countdown Timer Banner -->
+      <div id="bookingHoldTimer" style="display: none; align-items: center; justify-content: space-between; background: rgba(6,182,212,0.15); border: 1px solid var(--accent-cyan); border-radius: var(--radius-sm); padding: 10px 16px; margin-bottom: 16px;">
+        <span style="font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan);">⏱️ Temporary Slot Hold Active</span>
+        <span id="holdCountdownText" style="font-weight: 800; font-size: 0.95rem; color: #fff;">05:00</span>
+      </div>
+
+      <!-- Date Selection -->
+      <div class="form-group">
+        <label class="form-label">1. Select Consultation Date</label>
+        <input type="date" id="bookingDateInput" class="form-input">
+      </div>
+
+      <!-- Slot Selection Grid -->
+      <div class="form-group">
+        <label class="form-label">2. Select Time Slot (Click to Hold Slot)</label>
+        <div class="slot-grid" id="slotGridContainer">
+          <!-- Slots loaded here -->
+        </div>
+      </div>
+
+      <!-- Symptom Intake Form -->
+      <div class="form-group">
+        <label class="form-label">3. Describe Your Symptoms & Concerns</label>
+        <textarea 
+          id="bookingSymptomInput" 
+          class="form-textarea" 
+          placeholder="E.g., Experiencing mild chest tightness, shortness of breath on exertion for 3 days, dry cough..."
+        ></textarea>
+        <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+          <button type="button" id="btnAiTriage" class="btn btn-outline btn-sm" onclick="previewAIPreVisitSummary()">
+            ✨ AI Symptom Triage Preview
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Triage Preview Box -->
+      <div class="ai-summary-card" id="aiTriagePreview" style="display: none;">
+        <div class="ai-badge-header">
+          <span style="font-size: 0.82rem; font-weight: 700; color: var(--accent-cyan);">
+            <span class="ai-pulse-dot"></span> AI Pre-Visit Analysis
+          </span>
+          <span id="triageUrgencyBadge" class="badge-urgency Low">Low Urgency</span>
+        </div>
+        <div style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px;">
+          <strong>Chief Complaint:</strong> <span id="triageChiefComplaint">...</span>
+        </div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; margin-bottom: 4px;">Doctor's Suggested Questions:</div>
+        <ul id="triageQuestions" style="font-size: 0.8rem; color: #94a3b8; padding-left: 18px; line-height: 1.4;">
+        </ul>
+      </div>
+
+      <!-- Actions -->
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('bookingModal')">Cancel</button>
+        <button id="btnConfirmBooking" class="btn btn-primary" style="flex: 2;" onclick="submitBookingConfirmation()">
+          Confirm & Book Appointment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Success & Calendar Modal -->
+  <div class="modal-backdrop" id="bookingSuccessModal">
+    <div class="modal-card" style="text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
+      <h2 style="margin-bottom: 8px;">Booking Confirmed!</h2>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 18px;">
+        Your appointment has been locked in the database and confirmation emails have been dispatched.
+      </p>
+
+      <div style="background: rgba(30,41,59,0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; text-align: left;">
+        <div style="color: var(--text-secondary); font-size: 0.85rem;">Doctor:</div>
+        <h4 id="successDocName" style="color: #fff; margin-bottom: 8px;">Dr. Marcus Vance</h4>
+        <div style="color: var(--text-secondary); font-size: 0.85rem;">Date & Time:</div>
+        <div id="successDateTime" style="color: var(--accent-emerald); font-weight: 700;">2026-08-25 at 10:00 - 10:30</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a id="successGCalBtn" href="#" target="_blank" class="btn btn-emerald" style="width: 100%;">
+          <span>📅</span> Add to Google Calendar (1-Click)
+        </a>
+        <a id="successIcsBtn" href="#" class="btn btn-outline" style="width: 100%;">
+          <span>📥</span> Download .ICS Calendar File
+        </a>
+        <button class="btn btn-outline" onclick="closeModal('bookingSuccessModal'); switchTab('patient-appts');">
+          Go to My Appointments
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Doctor Consultation & Prescription Modal -->
+  <div class="modal-backdrop" id="consultationModal">
+    <div class="modal-card" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3>Finalize Medical Consultation</h3>
+        <button class="modal-close-btn" onclick="closeModal('consultationModal')">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Clinical Notes & Diagnosis</label>
+        <textarea 
+          id="clinicalNotesInput" 
+          class="form-textarea" 
+          rows="4" 
+          placeholder="Enter objective assessment, clinical findings, and diagnosis..."
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label class="form-label" style="margin-bottom: 0;">Prescription & Medication Regimen</label>
+          <button type="button" class="btn btn-outline btn-sm" onclick="addPrescriptionRow()">+ Add Medication</button>
+        </div>
+        <div id="rxRowsContainer">
+          <!-- Dynamic Rx rows -->
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('consultationModal')">Cancel</button>
+        <button id="btnSubmitConsultation" class="btn btn-primary" style="flex: 2;" onclick="submitConsultation()">
+          Finalize Consultation & Generate AI Summary
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reschedule Modal -->
+  <div class="modal-backdrop" id="rescheduleModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Reschedule Appointment</h3>
+        <button class="modal-close-btn" onclick="closeModal('rescheduleModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Select New Date</label>
+        <input type="date" id="rescheduleDateInput" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Select New Start Time (HH:MM)</label>
+        <select id="rescheduleTimeInput" class="form-select">
+          <option value="09:00">09:00 AM</option>
+          <option value="09:30">09:30 AM</option>
+          <option value="10:00">10:00 AM</option>
+          <option value="10:30">10:30 AM</option>
+          <option value="11:00">11:00 AM</option>
+          <option value="14:00">02:00 PM</option>
+          <option value="14:30">02:30 PM</option>
+          <option value="15:00">03:00 PM</option>
+          <option value="15:30">03:30 PM</option>
+          <option value="16:00">04:00 PM</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 12px; margin-top: 20px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('rescheduleModal')">Cancel</button>
+        <button class="btn btn-emerald" style="flex: 2;" onclick="submitReschedule()">Confirm Reschedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin: Create Doctor Modal -->
+  <div class="modal-backdrop" id="createDoctorModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Register New Doctor Profile</h3>
+        <button class="modal-close-btn" onclick="closeModal('createDoctorModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Doctor Full Name</label>
+        <input type="text" id="newDocName" class="form-input" placeholder="Dr. Jane Doe">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="newDocEmail" class="form-input" placeholder="jane.doe@clinicpulse.health">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="newDocPassword" class="form-input" value="DoctorPass123!">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Specialisation</label>
+        <input type="text" id="newDocSpec" class="form-input" placeholder="E.g., Cardiology, Dermatology, Pediatrics">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <div class="form-group">
+          <label class="form-label">Start Time</label>
+          <input type="text" id="newDocStart" class="form-input" value="09:00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Time</label>
+          <input type="text" id="newDocEnd" class="form-input" value="17:00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Slot Duration</label>
+          <select id="newDocSlotDuration" class="form-select">
+            <option value="15">15 min</option>
+            <option value="30" selected>30 min</option>
+            <option value="45">45 min</option>
+            <option value="60">60 min</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px; margin-top: 20px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('createDoctorModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex: 2;" onclick="submitCreateDoctor()">Create Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Drawer Dropdown -->
+  <div id="notificationDrawer" style="display: none; position: fixed; top: 75px; right: 20px; width: 360px; max-height: 480px; overflow-y: auto; background: #0f172a; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-card); z-index: 1000;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);">
+      <h4 style="font-size: 0.95rem;">Notification Center</h4>
+      <button class="btn btn-outline btn-sm" onclick="toggleNotificationDrawer()">Close</button>
+    </div>
+    <div id="notificationList">
+      <!-- Loaded dynamically -->
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
